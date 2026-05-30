@@ -1,4 +1,4 @@
-import { getPool } from ".";
+import { getPool } from "src/db";
 
 interface TableColumn {
   name: string;

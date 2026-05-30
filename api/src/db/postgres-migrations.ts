@@ -1,4 +1,4 @@
-import { getClient } from "./postgres-index";
+import { getClient } from "src/db/postgres-index";
 
 const createTables = async (
   client: ReturnType<typeof getClient> extends Promise<infer U> ? U : never,

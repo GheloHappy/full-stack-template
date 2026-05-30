@@ -1,4 +1,4 @@
-import { getPool } from ".";
+import { getPool } from "src/db";
 
 interface TableColumn {
   name: string;
@@ -52,7 +52,25 @@ const tables: TableDefinition[] = [
       },
     ],
   },
-
+  {
+    name: "audit_logs",
+    columns: [
+      { name: "id", type: "INT IDENTITY(1,1) PRIMARY KEY", isNullable: false },
+      { name: "user_id", type: "INT", isNullable: true },
+      { name: "username", type: "NVARCHAR(50)", isNullable: true },
+      { name: "action", type: "NVARCHAR(20)", isNullable: false },
+      { name: "table_name", type: "NVARCHAR(50)", isNullable: false },
+      { name: "record_id", type: "INT", isNullable: true },
+      { name: "old_values", type: "NVARCHAR(MAX)", isNullable: true },
+      { name: "new_values", type: "NVARCHAR(MAX)", isNullable: true },
+      {
+        name: "created_at",
+        type: "DATETIME",
+        isNullable: false,
+        default: "GETDATE()",
+      },
+    ],
+  },
 ];
 
 const indexes: IndexDefinition[] = [

@@ -1,5 +1,5 @@
 import { connect, type ConnectionPool, type IResult } from 'mssql';
-import { DB_NAME, DB_USER, DB_PASSWORD, DB_SERVER } from '../config/constants';
+import { DB_NAME, DB_USER, DB_PASSWORD, DB_SERVER } from 'src/config/constants';
 
 const config = {
   user: DB_USER,

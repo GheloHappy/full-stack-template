@@ -1,7 +1,7 @@
 import express from "express";
 import type { Request, Response } from "express";
 import cors from "cors";
-import { ALLOWED_HOSTS, PORT, APP_VERSION } from "./config/constants";
+import { ALLOWED_HOSTS, PORT, APP_VERSION } from "src/config/constants";
 import cookieParser from "cookie-parser";
 
 import authRoute from "src/module/auth/auth.route";

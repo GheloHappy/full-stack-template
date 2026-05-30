@@ -1,6 +1,7 @@
 {
   "name": "api",
   "module": "index.ts",
+  "type": "module",
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun",
@@ -21,7 +22,6 @@
     "typescript": "^5"
   },
   "private": true,
-  "type": "module",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
