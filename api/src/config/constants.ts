@@ -15,10 +15,11 @@ export const ALLOWED_HOSTS = getEnvVar("ALLOWED_HOSTS")
   .map((host) => host.trim());
 
 // Database Connections
+export const DB_PORT = parseInt(Bun.env.DB_PORT || "1433");
 export const DB_NAME = getEnvVar("DB_NAME");
 export const DB_USER = getEnvVar("DB_USER");
 export const DB_PASSWORD = getEnvVar("DB_PASSWORD");
-export const DB_SERVER = getEnvVar("DB_SERVER");
+export const DB_SERVER = Bun.env.DB_SERVER || Bun.env.DB_HOST || "localhost";
 
 export const APP_VERSION = "1.0.0";
 

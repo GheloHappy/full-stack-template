@@ -1,12 +1,12 @@
 import { Pool } from 'pg';
-import { DB_USER, DB_PASSWORD, DB_NAME } from 'src/config/constants';
+import { DB_USER, DB_PASSWORD, DB_NAME, DB_SERVER, DB_PORT } from 'src/config/constants';
 
 const pool = new Pool({
   user: DB_USER,
-  host: Bun.env.DB_HOST,
+  host: DB_SERVER,
   database: DB_NAME,
   password: DB_PASSWORD,
-  port: parseInt(Bun.env.DB_PORT || '5432'),
+  port: DB_PORT,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

@@ -1,12 +1,12 @@
 import { connect, type ConnectionPool, type IResult } from 'mssql';
-import { DB_NAME, DB_USER, DB_PASSWORD, DB_SERVER } from 'src/config/constants';
+import { DB_NAME, DB_USER, DB_PASSWORD, DB_SERVER, DB_PORT } from 'src/config/constants';
 
 const config = {
   user: DB_USER,
   password: DB_PASSWORD,
   server: DB_SERVER,
   database: DB_NAME,
-  port: parseInt(Bun.env.DB_PORT || '1433'),
+  port: DB_PORT,
   options: {
     encrypt: true,
     trustServerCertificate: true,
