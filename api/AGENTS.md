@@ -2,7 +2,7 @@
 
 ## Identity
 
-Elysia backend for SMR Module. Auth, users, inventory CRUD.
+Full backend express BUN for Web/Mobile setup. Auth, users, inventory CRUD.
 
 ## Rules
 

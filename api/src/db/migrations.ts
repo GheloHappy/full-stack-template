@@ -35,7 +35,7 @@ const tables: TableDefinition[] = [
       { name: "department", type: "NVARCHAR(50)", isNullable: false },
       {
         name: "role",
-        type: "NVARCHAR(20) CHECK (role IN ('USER','ADMIN'))",
+        type: "NVARCHAR(20) CHECK (role IN ('USER','ADMIN','SUPERADMIN'))",
         isNullable: false,
       },
       {

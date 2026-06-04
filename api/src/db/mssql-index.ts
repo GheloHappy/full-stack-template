@@ -8,7 +8,7 @@ const config = {
   database: DB_NAME,
   port: DB_PORT,
   options: {
-    encrypt: true,
+    encrypt: false,
     trustServerCertificate: true,
   },
   pool: {

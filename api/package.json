@@ -8,7 +8,7 @@
     "start": "NODE_ENV=production bun src/index.ts",
     "test": "bun test",
     "typecheck": "bun x tsc --noEmit",
-    "db:migrate": "bun src/migrate.ts"
+    "db:migrate": "bun src/db/migrations.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
