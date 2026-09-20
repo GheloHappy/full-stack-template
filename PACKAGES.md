@@ -1,16 +1,16 @@
 # Package Inventory
 
-The package manifests mirror the current `api-nest`, `mobile`, and `web` setups
+The package manifests mirror the current `api`, `mobile`, and `web` setups
 from the reference project. This file explains why the less obvious packages are
 present. Versions remain pinned in each application's `package.json` and lockfile.
 
-## API (`api-nest`)
+## API (`api`)
 
 | Area | Packages |
 | --- | --- |
 | Nest runtime | `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs` |
 | Configuration and validation | `@nestjs/config`, `class-transformer`, `class-validator` |
-| Database | `prisma`, `@prisma/client`, `@prisma/adapter-pg` |
+| Database | PostgreSQL: `prisma`, `@prisma/client`, `@prisma/adapter-pg`; SQL Server 2008: `mssql`, `@types/mssql` |
 | Auth and security | `@nestjs/jwt`, `@nestjs/throttler`, `bcrypt`, `jose`, `cookie-parser`, `google-auth-library` |
 | Realtime | `@nestjs/websockets`, `@nestjs/platform-ws`, `ws` |
 | External services | `@anthropic-ai/sdk`, `@google/generative-ai`, `openai`, `resend` |
@@ -49,6 +49,7 @@ removed when a project has no location features.
 
 ## Updating dependencies
 
-Update one application at a time, run its build and lint commands, then regenerate
-the root lockfile with `npm install`. For Expo packages, prefer `npx expo install`
-so native package versions remain compatible with the active Expo SDK.
+Update one application at a time and run `npm install`, build, lint, and tests
+inside that application's directory. Commit only that project's manifest and
+lockfile. For Expo packages, prefer `npx expo install` so native package versions
+remain compatible with the active Expo SDK.

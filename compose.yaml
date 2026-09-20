@@ -1,0 +1,54 @@
+name: ${COMPOSE_PROJECT_NAME:-full-stack-template}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    profiles: [postgres]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./api
+      args:
+        APP_VERSION: ${APP_VERSION:-0.0.1-dev}
+        APP_GIT_SHA: ${APP_GIT_SHA:-local}
+        APP_BUILD_NUMBER: ${APP_BUILD_NUMBER:-local}
+        APP_BUILT_AT: ${APP_BUILT_AT:-unknown}
+        APP_ENVIRONMENT: ${APP_ENVIRONMENT:-development}
+    restart: unless-stopped
+    env_file:
+      - ${BACKEND_ENV_FILE:-./api/.env}
+    ports:
+      - "${API_HOST_PORT:-3000}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  web:
+    build:
+      context: ./web
+      args:
+        APP_VERSION: ${APP_VERSION:-0.0.1-dev}
+        APP_GIT_SHA: ${APP_GIT_SHA:-local}
+        APP_BUILD_NUMBER: ${APP_BUILD_NUMBER:-local}
+        APP_BUILT_AT: ${APP_BUILT_AT:-unknown}
+        APP_ENVIRONMENT: ${APP_ENVIRONMENT:-development}
+    restart: unless-stopped
+    ports:
+      - "${WEB_HOST_PORT:-8080}:80"
+
+volumes:
+  postgres_data:
+    name: ${COMPOSE_PROJECT_NAME:-full-stack-template}-postgres-data

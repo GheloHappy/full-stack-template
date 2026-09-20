@@ -1,5 +1,5 @@
 {
-  "name": "api-nest",
+  "name": "api",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" --no-error-on-unmatched-pattern",
     "start": "nest start",
     "dev": "nest start --watch",
     "debug": "nest start --debug --watch",
@@ -18,10 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": "ts-node -r tsconfig-paths/register src/database/migrate.ts",
+    "db:migrate:prod": "node dist/database/migrate.js",
     "db:generate": "prisma generate",
     "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio"
   },
   "dependencies": {
@@ -43,6 +43,7 @@
     "cookie-parser": "^1.4.7",
     "google-auth-library": "^10.9.0",
     "jose": "^6.2.3",
+    "mssql": "^12.7.2",
     "openai": "^6.49.0",
     "reflect-metadata": "^0.2.2",
     "resend": "^6.18.0",
@@ -59,6 +60,7 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/mssql": "^12.3.0",
     "@types/node": "^24.0.0",
     "@types/supertest": "^7.0.0",
     "@types/ws": "^8.18.1",

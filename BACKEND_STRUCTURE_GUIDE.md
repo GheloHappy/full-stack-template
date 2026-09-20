@@ -1,16 +1,16 @@
 # Backend Structure Guide
 
-This template uses NestJS 11, Prisma 7, and PostgreSQL. It is organized around
-feature modules so new domains can be added without turning the root module into
+This template uses NestJS 11 with a deployment-selected database: Prisma 7 for
+PostgreSQL or raw `mssql` for SQL Server 2008. It is organized around feature
+modules so new domains can be added without turning the root module into
 application logic.
 
 ## Layout
 
 ```text
-api-nest/
+api/
   prisma/
     schema.prisma
-    migrations/
   src/
     main.ts
     app.module.ts
@@ -28,9 +28,15 @@ api-nest/
         example.controller.ts
         example.module.ts
         example.service.ts
-    prisma/
-      prisma.module.ts
-      prisma.service.ts
+    database/
+      database.module.ts
+      database.service.ts
+      database.types.ts
+      mssql.config.ts
+      migrate.ts
+      migrations/
+        postgresql.migrations.ts
+        mssql.migrations.ts
   .env.example
   prisma.config.ts
   nest-cli.json
@@ -63,20 +69,62 @@ Use the global `ValidationPipe` settings already in `main.ts`. Unknown fields ar
 rejected and supported values are transformed according to DTO metadata. Avoid
 manual request-body casting in controllers.
 
-## Prisma
+## Database selection
 
-Define models in `prisma/schema.prisma` and inject `PrismaService` into services.
-Never construct a Prisma client in a feature module.
+Every environment must explicitly set one provider:
+
+```env
+DB_PROVIDER=postgresql
+DATABASE_URL=postgresql://user:password@host:5432/database?schema=public
+```
+
+or:
+
+```env
+DB_PROVIDER=mssql
+DB_HOST=sql-host
+DB_PORT=1433
+DB_USER=app_user
+DB_PASSWORD=change-me
+DB_NAME=app
+DB_ENCRYPT=false
+DB_TRUST_SERVER_CERTIFICATE=true
+```
+
+`DatabaseService` opens only the selected connection. Inject it into feature
+services. PostgreSQL branches use `database.postgres`; MSSQL branches use
+`database.mssql` and parameterized requests. Keep provider branching in the
+persistence portion of a service or in a feature repository—not in controllers.
+
+Define PostgreSQL models in `prisma/schema.prisma`. Regenerate the typed client
+after model changes:
 
 ```bash
 npm run db:generate
-npm run db:migrate -- --name add_projects
 npm run db:studio
 ```
 
 Use explicit `@map` and `@@map` attributes if the database uses snake_case while
-TypeScript uses camelCase. Commit schema changes and their generated migrations
-together.
+TypeScript uses camelCase. `db:studio` is PostgreSQL-only.
+
+## Migrations
+
+Migrations are ordered TypeScript entries rather than provider-generated files:
+
+- `postgresql.migrations.ts` contains PostgreSQL SQL.
+- `mssql.migrations.ts` contains SQL Server 2008-compatible SQL.
+- Both lists use the same unique id for the same logical schema change.
+- `npm run db:migrate` reads `DB_PROVIDER`, runs pending entries in transactions,
+  and records them in the app-owned `app_migrations` table.
+
+For each schema change, update the Prisma schema and both migration lists. Never
+edit an already-deployed migration; append a new one. Test the migration against
+both database engines when the feature claims dual-provider support.
+
+SQL Server 2008 has important limitations. Use `ROW_NUMBER()` rather than
+`OFFSET/FETCH`; do not use `CREATE OR ALTER`, `DROP ... IF EXISTS`, JSON SQL
+functions, `STRING_AGG`, or newer-only types. Prefer `DATETIME2`,
+`UNIQUEIDENTIFIER`, `NVARCHAR`, and explicit `IF OBJECT_ID(...)` guards.
 
 ## Authentication pattern
 
@@ -130,5 +178,5 @@ mistaken for new local writes.
 - List explicit CORS origins when credentials are enabled.
 - Keep provider keys and database credentials in environment configuration.
 - Add a public health endpoint that verifies database connectivity.
-- Run migrations as a deliberate deployment step.
+- Run `npm run db:migrate` as a deliberate deployment step.
 - Build with `npm run build` and start with `npm run prod`.

@@ -9,6 +9,9 @@ cp .env.example .env
 npm run dev
 ```
 
+This project is installed and deployed independently. Configure a web Jenkins
+job with `web/Jenkinsfile`; it does not build, migrate, or restart the API.
+
 The sample page performs no API request, so it starts without the backend. Add
 calls through `src/lib/fetcher.ts` and keep server state in React Query.
 

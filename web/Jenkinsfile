@@ -1,0 +1,101 @@
+def DEPLOY_TARGETS = [
+    'example': [envDir: '/var/www/my-app/example', livePort: '3101', testPort: '3111', includeInAll: true],
+]
+
+def safeName(String value) {
+    value.toLowerCase().replaceAll(/[^a-z0-9_.-]+/, '-').replaceAll(/^-+|-+$/, '')
+}
+
+def deployTarget(String targetKey, Map config) {
+    def key = safeName("${params.DEPLOY_NAMESPACE}-${targetKey}")
+    withEnv([
+        "ENV_FILE=${config.envDir}/fe.env",
+        "IMAGE=${key}-web:${env.BUILD_NUMBER}",
+        "LIVE_CONTAINER=${key}-web",
+        "NEXT_CONTAINER=${key}-web-next",
+        "LIVE_PORT=${config.livePort}",
+        "TEST_PORT=${config.testPort}",
+        "APP_ENVIRONMENT=${targetKey}",
+    ]) {
+        try {
+            stage("Validate ${targetKey}") {
+                sh 'test -f "$ENV_FILE" || { echo "Missing $ENV_FILE"; exit 1; }'
+            }
+            stage("Build ${targetKey}") {
+                dir('web') {
+                    sh '''
+                        set -eu
+                        cp "$ENV_FILE" .env.production
+                        docker build \
+                          --build-arg APP_VERSION="$APP_VERSION" \
+                          --build-arg APP_GIT_SHA="$APP_GIT_SHA" \
+                          --build-arg APP_BUILD_NUMBER="$BUILD_NUMBER" \
+                          --build-arg APP_BUILT_AT="$APP_BUILT_AT" \
+                          --build-arg APP_ENVIRONMENT="$APP_ENVIRONMENT" \
+                          -t "$IMAGE" .
+                        rm -f .env.production
+                    '''
+                }
+            }
+            stage("Smoke ${targetKey}") {
+                sh '''
+                    set -eu
+                    docker rm -f "$NEXT_CONTAINER" >/dev/null 2>&1 || true
+                    docker run -d --name "$NEXT_CONTAINER" -p "$TEST_PORT:80" "$IMAGE"
+                    for attempt in $(seq 1 30); do
+                      if curl -fsS "http://127.0.0.1:$TEST_PORT/" | grep -qi '<html'; then exit 0; fi
+                      if [ "$attempt" = 30 ]; then docker logs "$NEXT_CONTAINER" || true; exit 1; fi
+                      sleep 2
+                    done
+                '''
+            }
+            stage("Deploy ${targetKey}") {
+                sh '''
+                    set -eu
+                    docker rm -f "$LIVE_CONTAINER" >/dev/null 2>&1 || true
+                    docker run -d --name "$LIVE_CONTAINER" -p "$LIVE_PORT:80" \
+                      --restart=always "$IMAGE"
+                    docker rm -f "$NEXT_CONTAINER" >/dev/null 2>&1 || true
+                '''
+            }
+        } finally {
+            sh '''
+                rm -f web/.env.production
+                docker rm -f "$NEXT_CONTAINER" >/dev/null 2>&1 || true
+            '''
+        }
+    }
+}
+
+pipeline {
+    agent any
+    parameters {
+        string(name: 'DEPLOY_TARGET', defaultValue: 'example', description: 'Target key or all')
+        string(name: 'DEPLOY_NAMESPACE', defaultValue: 'my-app', description: 'Unique Docker namespace')
+    }
+    stages {
+        stage('Metadata') {
+            steps {
+                script {
+                    env.APP_VERSION = sh(script: "node -p \"require('./web/package.json').version\"", returnStdout: true).trim()
+                    env.APP_GIT_SHA = sh(script: 'git rev-parse --verify HEAD', returnStdout: true).trim()
+                    env.APP_BUILT_AT = sh(script: 'date -u +%Y-%m-%dT%H:%M:%SZ', returnStdout: true).trim()
+                }
+            }
+        }
+        stage('Deploy targets') {
+            steps {
+                script {
+                    def keys = params.DEPLOY_TARGET == 'all'
+                        ? DEPLOY_TARGETS.findAll { name, value -> value.includeInAll }.keySet() as List
+                        : [params.DEPLOY_TARGET]
+                    for (String key : keys) {
+                        if (!DEPLOY_TARGETS.containsKey(key)) error "Unknown target: ${key}"
+                        deployTarget(key, DEPLOY_TARGETS[key])
+                    }
+                }
+            }
+        }
+    }
+    post { always { sh 'docker image prune -f --filter "dangling=true" || true' } }
+}
