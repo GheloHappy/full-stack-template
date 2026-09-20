@@ -1,13 +1,11 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+import HomePage from './pages/Home.page'
 
-function App() {
-
+export default function App() {
   return (
-    <>
-      <div className="bg-red-200">
-        <h1>Hello World</h1>
-      </div>
-    </>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
-
-export default App

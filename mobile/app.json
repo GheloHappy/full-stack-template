@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Full Stack Template",
+    "slug": "full-stack-template",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "fullstacktemplate",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.example.fullstacktemplate"
+    },
+    "android": {
+      "package": "com.example.fullstacktemplate",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      "expo-secure-store",
+      "expo-font",
+      "@react-native-community/datetimepicker",
+      "@react-native-google-signin/google-signin",
+      "expo-notifications",
+      "expo-sharing",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to use the microphone.",
+          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to use speech recognition."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
